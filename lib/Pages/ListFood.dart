@@ -71,8 +71,8 @@ class _list_food extends State<list_food> {
     });
   }
 
-  Future addToCart(String id, String type, int number) async {
-    databaseHelper.addToCart(id, type, number);
+  Future addToCart(String id, String type, int number,String name,int price) async {
+    databaseHelper.addToCart(id, type, number, name ,price);
   }
 
   @override
@@ -86,7 +86,7 @@ class _list_food extends State<list_food> {
   Widget build(BuildContext context) {
     double _paddingTop = MediaQuery.of(context).padding.top;
 
-    confirmDialog(String id, String type) {
+    confirmDialog(String id, String type,String name, int price) {
       showDialog(
           context: context,
           builder: (context) {
@@ -149,7 +149,7 @@ class _list_food extends State<list_food> {
                           ),
                           GestureDetector(
                             onTap: () {
-                              addToCart(id, type, int.parse(_num.text));
+                              addToCart(id, type, int.parse(_num.text),name, price);
                               Navigator.pushReplacement(context,
                                   MaterialPageRoute(builder: (context) {
                                 return main_page();
@@ -248,8 +248,7 @@ class _list_food extends State<list_food> {
                           ),
                           GestureDetector(
                             onTap: () {
-                              confirmDialog(foodList[index].documentID,
-                                  foodList[index].data['type']);
+                              confirmDialog(foodList[index].documentID,foodList[index].data['type'],foodList[index].data['name'],foodList[index].data['price']);
                             },
                             child: Container(
                               width: 100,

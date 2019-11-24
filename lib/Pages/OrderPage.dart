@@ -8,6 +8,10 @@ class order_page extends StatefulWidget {
 }
 
 class _order_page extends State<order_page> {
+  TextStyle rejectFontStyle = TextStyle(
+      color: Color(0xffcc3131), fontSize: 22, fontWeight: FontWeight.w900);
+  TextStyle confirmFontStyle = TextStyle(
+      color: Color(0xff5745bb), fontSize: 22, fontWeight: FontWeight.w900);
   TextStyle headerFontStyle = TextStyle(
       color: Color(0xff7a614c), fontSize: 30, fontWeight: FontWeight.w900);
   TextStyle tableFontStyle = TextStyle(
@@ -24,6 +28,7 @@ class _order_page extends State<order_page> {
   DatabaseHelper databaseHelper = DatabaseHelper.internal();
   List<Map<String, dynamic>> listCart;
   List<DocumentSnapshot> listCartDetail;
+  TextEditingController _tableNumber = TextEditingController();
   double sum;
   final _db = Firestore.instance;
   Future loadCart() async {
@@ -55,28 +60,30 @@ class _order_page extends State<order_page> {
     loadCart();
   }
 
-  Future sendOrder() async {
+  Future sendOrder(String table) async {
     print(listCart);
-    await _db.collection('orders').add({'date': DateTime.now().toUtc(),'orders': listCart});
+    await _db
+        .collection('orders')
+        .add({'date': DateTime.now().toUtc(),'table': table, 'orders': listCart});
     showDialog(
-      context: context,
-      builder: (context){
-        return AlertDialog(
-          content: Text("ส่งออเดอร์เรียบร้อย",style: headerFontStyle,),
-          actions: <Widget>[
-            FlatButton(
-              child: Text("ตกลง"),
-              onPressed: (){
-                resetCart();
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context){
-                  return main_page();
-                }));
-              },
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: Text(
+              "ส่งออเดอร์เรียบร้อย",
+              style: headerFontStyle,
             ),
-          ],
-        );
-      }
-    );
+            actions: <Widget>[
+              FlatButton(
+                child: Text("ตกลง"),
+                onPressed: () {
+                  resetCart();
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        });
   }
 
   String toTypeFolder(String type) {
@@ -118,6 +125,89 @@ class _order_page extends State<order_page> {
 
   @override
   Widget build(BuildContext context) {
+    confirmDialog() {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              contentPadding: EdgeInsets.all(10),
+              content: Container(
+                height: 300,
+                width: 300,
+                color: Colors.white,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                      child: Container(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Container(
+                              child: Text(
+                                "ระบุเลขโต๊ะ",
+                                style: headerFontStyle,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey)),
+                              width: 60,
+                              height: 100,
+                              alignment: Alignment.center,
+                              child: TextField(
+                                controller: _tableNumber,
+                                keyboardType: TextInputType.number,
+                                textAlign: TextAlign.center,
+                                style: headerFontStyle,
+                                decoration:
+                                    InputDecoration.collapsed(hintText: ""),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Container(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Container(
+                              child: Text(
+                                "ยกเลิก",
+                                style: rejectFontStyle,
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              sendOrder(_tableNumber.text);
+                              Navigator.pushReplacement(context,
+                                  MaterialPageRoute(builder: (context) {
+                                return main_page();
+                              }));
+                            },
+                            child: Container(
+                              child: Text("ยืนยัน", style: confirmFontStyle),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          });
+    }
+
     return Container(
       color: Color(0xffffefdc),
       child: Column(
@@ -304,7 +394,7 @@ class _order_page extends State<order_page> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    sendOrder();
+                    confirmDialog();
                   },
                   child: Container(
                     decoration: BoxDecoration(

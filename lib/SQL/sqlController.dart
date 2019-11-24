@@ -13,7 +13,9 @@ class DatabaseHelper{
   String sqlCreateTable = '''CREATE TABLE IF NOT EXISTS orders(
 	  order_id varchar(50) PRIMARY KEY,
     order_type varchar(50),
-    order_num INTEGER
+    order_num INTEGER,
+    order_name varchar(50),
+    order_price INTEGER
     )''';
 
   Future<Database> getDb()async{
@@ -36,9 +38,9 @@ class DatabaseHelper{
     print("Table is created");
   }
 
-  Future addToCart(String id, String type, int num)async{
+  Future addToCart(String id, String type, int num,String name,int price)async{
     var dbClient = await getDb();
-    String sql = "INSERT INTO orders(order_id,order_type,order_num) VALUES('${id}','${type}',${num}) ON CONFLICT(order_id) DO UPDATE SET order_num = order_num + ${num};";
+    String sql = "INSERT INTO orders(order_id,order_type,order_num,order_name, order_price) VALUES('${id}','${type}',${num},'${name}',${price}) ON CONFLICT(order_id) DO UPDATE SET order_num = order_num + ${num};";
     print(sql);
     await dbClient.rawQuery(sql);
   }
